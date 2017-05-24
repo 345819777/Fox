@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Foscam</title>
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,minimal-ui" />
+<meta name="copyright" content="Copyright (c) 2006-2016 Mafengwo." />
+<meta name="format-detection" content="telephone=no,address=no" />
+<meta name="referrer" content="always" />
+
+
+
+<script language="javascript" src="__ROOT__/Public/App/js/jquery.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+
+<div class="hide" id="_j_pushmdds"></div>
+
+
+
+
+
+<style>
+    .showmore {
+        font-size:.373rem;
+        padding:20px;
+        text-align:center;
+        color:#999
+    }
+
+    .footer li a{
+        font-size: 10px;
+    }
+
+    .footer p {
+        font-size: .1rem;
+    }
+</style>
+
+<input type="hidden" id="page_num" value="1" />
+    <!-- 轮播图 -->
+    
+
+
+
+<section class="guideflow">
+   
+    <div class="bd">
+    <foreach name="data" item="val">
+    	<a class="item opacity" href="">
+          <h3>{$val.model}</h3>
+          <span class="date">{$val.id}</span>
+        </a>
+    </foreach>            
+    </div>
+</section>
+<div class="showmore">加载更多</div>
+
+
+
+<script>
+    function myEvent(obj,ev,fn){
+        if(obj.attachEvent){
+            obj.attachEvent('on'+ev,fn);
+        }else{
+            obj.addEventListener(ev,fn,false);
+        }
+    }
+    myEvent(window,'load',function(){
+		
+        var oRTT=document.getElementById('gototop');
+        var pH=document.documentElement.clientHeight;
+        var timer=null;
+        var scrollTop;
+        var scrollHeight;
+		
+        window.onscroll=function(){
+            scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+
+            //
+            scrollHeight = document.documentElement.scrollHeight||document.body.scrollHeight;
+            if (scrollHeight - scrollTop < 800) {
+                var page = oPageNum.val();
+                _getInfoFlowList(page);
+            }
+
+
+            if(scrollTop>=pH){
+                oRTT.style.display='block';
+            }else{
+                oRTT.style.display='none';
+            }
+            return scrollTop;
+        };
+        oRTT.onclick=function(){
+            clearInterval(timer);
+            timer=setInterval(function(){
+                var now=scrollTop;
+                var speed=(0-now)/10;
+                speed=speed>0?Math.ceil(speed):Math.floor(speed);
+                if(scrollTop==0){
+                    clearInterval(timer);
+                }
+                document.documentElement.scrollTop=scrollTop+speed;
+                document.body.scrollTop=scrollTop+speed;
+            }, 10);
+        }
+    });
+
+
+
+
+    var loading = false;  //加载的全局标志
+    var oListArea = $(".guideflow").find(".bd"); //todo
+    var oPageNum = $("#page_num");
+    //评论列表
+    $(".showmore").click(function() {
+        var page = oPageNum.val();
+        _getInfoFlowList(page);
+    });
+
+    //ajax获取评论列表
+    var _getInfoFlowList = function(page) {
+        if(loading) {
+            return;
+        }
+        loading = true;
+        $(".showmore").text("加载中..");
+        $.ajax({
+            url: '{:U("Appfaq/jsondata")}',
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                'category': 'get_info_flow_list',
+                'p': page
+            },
+            success: function (json) {
+              
+					//var data = json.data;
+                    var page = json.page;
+                    var show_more = json.show_more;
+                    var infoList = '';
+
+					for (var i=0; i<json.lists.length; i++) {
+                         infoList  +=   '<a class="item opacity" href="'+json.lists[i].id+'">'
+                                          
+                                            +'<h3>'+json.lists[i].model+'</h3>'
+                                            +'<span class="date">'+json.lists[i].id+'</span>'
+                                        +'</a>';
+                       
+
+                       
+                    }
+					/*page++;*/
+                    oPageNum.val(page);
+                    oListArea.append(infoList);
+                    if (show_more == true) {
+                        $(".showmore").text("加载更多");
+                        loading = false;
+                    } else {
+                        $(".showmore").text("没有更多了");
+                    }
+             
+            },
+            error: function () {
+                alert("请求失败");
+            }
+        })
+    }
+</script>
+<footer class="footer">
+    <ul>
+        <li><a href="http://www.mafengwo.cn/?vsite=www">PC版</a></li>
+        <li><a href="/feedback.php">用户反馈</a></li>
+        <li><a href="/s/hr.html" class="light">加入我们</a></li>
+        <li><a href="https://passport.mafengwo.cn">登录</a></li>
+    </ul>
+    <p>© 2016 Mafengwo.cn 京ICP备11015476号 </p>
+</footer>
+
+
+</body>
+</html>
